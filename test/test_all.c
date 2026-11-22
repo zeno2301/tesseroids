@@ -12,6 +12,7 @@ Run all unit tests. This is compiled into a single executable (tesstest).
 #include "test_grav_prism.c"
 #include "test_grav_prism_sph.c"
 #include "test_grav_tess.c"
+#include "test_grav_prism_cuda.c"
 
 int tests_run = 0, tests_passed = 0, tests_failed = 0;
 
@@ -28,6 +29,7 @@ int main()
     failed += grav_prism_run_all();
     failed += grav_prism_sph_run_all();
     failed += grav_tess_run_all();
+    failed += grav_prism_cuda_run_all();
 
     mu_print_summary((double)(clock() - start)/CLOCKS_PER_SEC);
 
