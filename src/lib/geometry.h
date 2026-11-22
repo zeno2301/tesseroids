@@ -6,6 +6,10 @@ Defines the TESSEROID, SPHERE, and PRISM structures.
 #ifndef _TESSEROIDS_GEOMETRY_H_
 #define _TESSEROIDS_GEOMETRY_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 /* Store information on a tesseroid */
 typedef struct tess_struct {
@@ -164,5 +168,9 @@ extern double sphere_volume(SPHERE sphere);
 */
 extern double prism_volume(PRISM prism);
 
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

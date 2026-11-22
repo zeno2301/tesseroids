@@ -6,6 +6,10 @@ Input and output parsing tools.
 #ifndef _TESSEROIDS_PARSERS_H_
 #define _TESSEROIDS_PARSERS_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Needed for definition of TESSEROID and PRISM */
 #include "geometry.h"
 /* Need for the definition of FILE */
@@ -313,4 +317,8 @@ convert it to tesseroids.
 */
 extern int gets_layers(const char *str, double dlon, double dlat,
     TESSEROID *tessbuff, int buffsize);
+#ifdef __cplusplus
+}
+#endif
+
 #endif

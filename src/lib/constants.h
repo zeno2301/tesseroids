@@ -9,6 +9,10 @@ All values are in SI units!
 #ifndef _TESSEROIDS_CONSTANTS_H_
 #define _TESSEROIDS_CONSTANTS_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Mean Earth radius [\f$ m \f$] */
 extern const double MEAN_EARTH_RADIUS;
 
@@ -40,5 +44,9 @@ extern const double TESSEROID_GXZ_SIZE_RATIO;
 extern const double TESSEROID_GYY_SIZE_RATIO;
 extern const double TESSEROID_GYZ_SIZE_RATIO;
 extern const double TESSEROID_GZZ_SIZE_RATIO;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

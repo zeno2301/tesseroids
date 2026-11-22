@@ -73,6 +73,10 @@ levels in the same program.
 #ifndef _TESSEROIDS_LOGGER_H_
 #define _TESSEROIDS_LOGGER_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Needed for definition of FILE */
 #include <stdio.h>
 
@@ -162,5 +166,9 @@ Prints a newline at the end.
 */
 extern void log_error(const char *fmt, ...);
 
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

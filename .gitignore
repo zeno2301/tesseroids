@@ -1,5 +1,7 @@
 *.o
 bin/
+bin-cuda/
+bin-sim/
 build/
 dist/
 tesstest

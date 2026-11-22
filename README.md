@@ -25,6 +25,10 @@ The mass models can be made of right rectangular prisms or tesseroids
 Computation for rectangular prisms can be made in Cartesian or spherical
 (geocentric) coordinates.
 
+The rectangular-prism programs (`prismpot`, `prismgx`, ..., `prismgzz`) are
+also available in a **CUDA version** that runs on NVIDIA GPUs with the same
+command line interface and file formats — see [CUDA.md](CUDA.md).
+
 [![This is a tesseroid.](https://raw.githubusercontent.com/leouieda/tesseroids/master/doc/_static/tesseroid.png)](http://tesseroids.leouieda.com/en/latest/theory.html#what-is-a-tesseroid-anyway)
 
 ## License

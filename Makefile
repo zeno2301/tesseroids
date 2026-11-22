@@ -1,15 +1,37 @@
-VERSION := $(shell python print_version.py)
+VERSION := $(shell python print_version.py 2>/dev/null || python3 print_version.py 2>/dev/null || git describe --tags --always 2>/dev/null || echo unknown)
 DIST := dist
 PKGNAME := tesseroids-$(VERSION)
 PKG := $(DIST)/$(PKGNAME)
 
-.PHONY: help build check test package pkg-bin32 pkg-bin64 pkg-win32 pkg-win64 clean
+# Prism field components (program suffixes)
+PRISM_FIELDS := pot gx gy gz gxx gxy gxz gyy gyz gzz
+
+# C sources shared by the CPU and CUDA builds
+LIBSRC := src/lib/logger.c src/lib/version.c src/lib/constants.c \
+          src/lib/geometry.c src/lib/parsers.c
+
+# CUDA build settings (override on the command line if needed, e.g.
+#   make build-cuda NVCCARCH="-arch=native" CUDA_PATH=/opt/cuda)
+NVCC ?= nvcc
+CUDA_PATH ?= /usr/local/cuda
+NVCCFLAGS ?= -O3 -I$(CUDA_PATH)/include
+# PTX for compute_60 JITs on any GPU sm_60+, plus native SASS for sm_75
+NVCCARCH ?= -gencode arch=compute_60,code=compute_60 -gencode arch=compute_75,code=sm_75
+CUDALIBS := -L$(CUDA_PATH)/lib64 -lcudart -Wl,-rpath,$(CUDA_PATH)/lib64
+CUDA_CUSRC := src/lib/grav_prism_cuda.cu src/lib/prismg_main_cuda.cu
+CUDA_HDRS := src/lib/grav_prism_cuda.h src/lib/grav_prism_kernels.cuh \
+             src/lib/prismg_main_cuda.h
+
+.PHONY: help build check test build-cpu build-cuda test-cpu package pkg-bin32 pkg-bin64 pkg-win32 pkg-win64 pkg-src clean
 
 help:
 	@echo "Commands:"
-	@echo "  build        Compile the source"
+	@echo "  build        Compile the source (scons)"
+	@echo "  build-cpu    Compile the CPU prism* programs with gcc into bin/"
+	@echo "  build-cuda   Compile the CUDA prism* programs with nvcc into bin-cuda/"
+	@echo "  test         Run the tests (scons build)"
+	@echo "  test-cpu     Build and run the unit tests with gcc"
 	@echo "  check        Compile in debug mode and check for ANSI compatibility"
-	@echo "  test         Run the tests"
 	@echo "  clean        Clean the directory"
 	@echo "  package      Make binary packages for all supported platforms"
 	@echo "  pkg-bin32    Make a 32bit linux binary distribution"
@@ -26,6 +48,32 @@ check:
 
 test: build
 	./tesstest
+
+# Generate src/lib/version.c from the template
+src/lib/version.c: src/lib/version.template
+	sed -e 's/$$VERSION/$(VERSION)/' -e 's/$$YEAR/$(shell date +%Y)/' $< > $@
+
+# CPU versions of the prism* programs (plain gcc, no scons needed)
+build-cpu: src/lib/version.c $(PRISM_FIELDS:%=bin/prism%)
+
+bin/prism%: src/prism%.c src/lib/prismg_main.c src/lib/grav_prism.c $(LIBSRC)
+	mkdir -p bin
+	gcc -O3 -Isrc/lib -o $@ $< src/lib/prismg_main.c src/lib/grav_prism.c $(LIBSRC) -lm
+
+# CUDA versions of the prism* programs (need nvcc and an NVIDIA GPU to run)
+build-cuda: src/lib/version.c $(PRISM_FIELDS:%=bin-cuda/prism%)
+
+bin-cuda/prism%: src/cuda/prism%.c $(CUDA_CUSRC) $(CUDA_HDRS) $(LIBSRC)
+	mkdir -p bin-cuda
+	$(NVCC) $(NVCCFLAGS) $(NVCCARCH) -Isrc/lib -o $@ $< $(CUDA_CUSRC) $(LIBSRC) $(CUDALIBS)
+
+# Unit tests with plain gcc (includes the CUDA device-code validation tests)
+test-cpu: src/lib/version.c tesstest
+	./tesstest
+
+tesstest: test/test_all.c $(LIBSRC) src/lib/grav_prism.c src/lib/grav_prism_sph.c \
+          src/lib/grav_tess.c src/lib/glq.c src/lib/grav_sphere.c
+	gcc -O2 -Isrc/lib -o $@ test/test_all.c src/lib/*.c -lm
 
 package: pkg-bin32 pkg-bin64 pkg-win32 pkg-win64
 
