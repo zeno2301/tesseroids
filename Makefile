@@ -17,7 +17,8 @@ CUDA_PATH ?= /usr/local/cuda
 NVCCFLAGS ?= -O3 -I$(CUDA_PATH)/include
 # PTX for compute_60 JITs on any GPU sm_60+, plus native SASS for sm_75
 NVCCARCH ?= -gencode arch=compute_60,code=compute_60 -gencode arch=compute_75,code=sm_75
-CUDALIBS := -L$(CUDA_PATH)/lib64 -lcudart -Wl,-rpath,$(CUDA_PATH)/lib64
+# nvcc не принимает -Wl,... напрямую: опции линкёра передаём через -Xlinker
+CUDALIBS := -L$(CUDA_PATH)/lib64 -lcudart -Xlinker -rpath -Xlinker $(CUDA_PATH)/lib64
 CUDA_CUSRC := src/lib/grav_prism_cuda.cu src/lib/prismg_main_cuda.cu
 CUDA_HDRS := src/lib/grav_prism_cuda.h src/lib/grav_prism_kernels.cuh \
              src/lib/prismg_main_cuda.h
